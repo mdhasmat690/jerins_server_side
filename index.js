@@ -22,15 +22,21 @@ async function run() {
     await client.connect();
     const dataBase = client.db("jerinsService");
     const servicesCollection = dataBase.collection("service");
-      // const productsCollection = dataBase.collection("products");
-     const purchesDataCollection = dataBase.collection("purches");
+    const blogCollection = dataBase.collection("blog");
+    const purchesDataCollection = dataBase.collection("purches");
     const reviewDataCollection = dataBase.collection("reviews");
-     const usersCollection = dataBase.collection("users");
+    const usersCollection = dataBase.collection("users");
 
     //post api
     app.post("/services", async (req, res) => {
       const service = req.body;
       const result = await servicesCollection.insertOne(service);
+      console.log(result);
+      res.send(result);
+    });
+    app.post("/blog", async (req, res) => {
+      const service = req.body;
+      const result = await blogCollection.insertOne(service);
       console.log(result);
       res.send(result);
     });
@@ -48,7 +54,7 @@ async function run() {
       const result = await purchesDataCollection.insertOne(product);
       res.send(result);
     });
-//user post
+    //user post
     app.post("/users", async (req, res) => {
       const user = req.body;
       const result = await usersCollection.insertOne(user);
@@ -71,17 +77,17 @@ async function run() {
       res.json(result);
     });
 
-//put admin
+    //put admin
     app.put("/users/admin", async (req, res) => {
       const user = req.body;
       const filter = { email: user.email };
       const updateDoc = { $set: { role: "admin" } };
       const result = await usersCollection.updateOne(filter, updateDoc);
       console.log(result);
-      res.send('result');
+      res.send(result);
     });
 
-    //patch 
+    //patch
 
     app.patch("/purches/:id", async (req, res) => {
       const { id } = req.params;
@@ -92,7 +98,6 @@ async function run() {
       console.log(result);
       res.send(result);
     });
-
 
     //get api
     app.get("/services", async (req, res) => {
@@ -115,12 +120,23 @@ async function run() {
       const allproduct = await product.toArray();
       res.send(allproduct);
     });
+    app.get("/blog", async (req, res) => {
+      const blogs = blogCollection.find({});
+      const allblogs = await blogs.toArray();
+      res.send(allblogs);
+    });
 
     //get single data by id
     app.get("/services/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const service = await servicesCollection.findOne(query);
+      res.send(service);
+    });
+    app.get("/blog/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const service = await blogCollection.findOne(query);
       res.send(service);
     });
 
@@ -131,148 +147,42 @@ async function run() {
       res.send(allproduct);
     });
 
-     //get purchesdata by email id
-     app.get("/purches/:email", async (req, res) => {
+    //get purchesdata by email id
+    app.get("/purches/:email", async (req, res) => {
       const email = req.params.email;
-      console.log(email);
       const query = { email: email };
       const cursor = purchesDataCollection.find(query);
       const purche = await cursor.toArray();
       res.send(purche);
     });
 
-    //get users by email
     app.get("/users/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
-      // const user = await usersCollection.findOne(query);
-      // let isAdmin = false;
-      // if (user?.role === "admin") {
-      //   isAdmin = true;
-      // }
-      // res.json({ admin: isAdmin });
-
-      const cursor = usersCollection.find(query);
-      const purche = await cursor.toArray();
-      res.send(purche);
+      const user = await usersCollection.findOne(query);
+      console.log(user);
+      let isAdmin = false;
+      if (user?.role === "admin") {
+        isAdmin = true;
+      }
+      res.json({ admin: isAdmin });
     });
 
-
-    //get api
-    /*    app.get("/products", async (req, res) => {
-          const { limit } = req.query;
-          let product = null;
-    
-          if (limit) {
-            product = productsCollection.find({}).limit(parseInt(limit, 10));
-          } else {
-            product = productsCollection.find({});
-          }
-    
-          const allproduct = await product.toArray();
-          res.send(allproduct);
-        });
-     */
-    /*    app.get("/review", async (req, res) => {
-          const product = reviewDataCollection.find({});
-          const allproduct = await product.toArray();
-          res.send(allproduct);
-        }); */
-
-    /*   app.get("/purches", async (req, res) => {
-          const product = purchesDataCollection.find({});
-          const allproduct = await product.toArray();
-          res.send(allproduct);
-        });
-     */
-    //get single data by id
-    /*    app.get("/products/:id", async (req, res) => {
-          const id = req.params.id;
-          const query = { _id: ObjectId(id) };
-          const service = await productsCollection.findOne(query);
-          res.send(service);
-        }); */
-
-    //get data by email id
-    /*    app.get("/purches/:email", async (req, res) => {
-          const email = req.params.email;
-          console.log(email);
-          const query = { email: email };
-          const cursor = purchesDataCollection.find(query);
-          const purche = await cursor.toArray();
-          res.send(purche);
-        }); */
-
-    /*   //post api
-        app.post("/products", async (req, res) => {
-          const service = req.body;
-          const result = await servicesCollection.insertOne(service);
-          console.log(result);
-          res.send('result');
-        }); */
-
-    /*   app.post("/purches", async (req, res) => {
-          const product = req.body;
-          const result = await purchesDataCollection.insertOne(product);
-          res.send(result);
-        }); */
-
-    /*  app.post("/review", async (req, res) => {
-          const product = req.body;
-          const result = await reviewDataCollection.insertOne(product);
-          res.send(result);
-        }); */
-    //User
-    /*  app.post("/users", async (req, res) => {
-          const user = req.body;
-          const result = await usersCollection.insertOne(user);
-          res.json(result);
-        });
-     */
-    /*     app.get("/users/:email", async (req, res) => {
-          const email = req.params.email;
-          const query = { email: email };
-          const user = await usersCollection.findOne(query);
-          let isAdmin = false;
-          if (user?.role === "admin") {
-            isAdmin = true;
-          }
-          res.json({ admin: isAdmin });
-        }); */
-
-    /*     app.put("/users/admin", async (req, res) => {
-          const user = req.body;
-          const filter = { email: user.email };
-          const updateDoc = { $set: { role: "admin" } };
-          const result = await usersCollection.updateOne(filter, updateDoc);
-          console.log(result);
-          res.send(result);
-        }); */
-
-    /*    app.patch("/purches/:id", async (req, res) => {
-          const { id } = req.params;
-          const result = await purchesDataCollection.updateOne(
-            { _id: ObjectId(id) },
-            { $set: { status: "shipped" } }
-          );
-          console.log(result);
-          res.send(result);
-        }); */
-
     //delete post
-    /*   app.delete("/products/:id", async (req, res) => {
-          const id = req.params.id;
-          const query = { _id: ObjectId(id) };
-          const result = await productsCollection.deleteOne(query);
-          res.send(result);
-        }); */
+    app.delete("/services/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await servicesCollection.deleteOne(query);
+      res.send(result);
+    });
 
-    /*   app.delete("/purches/:id", async (req, res) => {
-          const id = req.params.id;
-          const query = { _id: ObjectId(id) };
-          const result = await purchesDataCollection.deleteOne(query);
-          res.send(result);
-        }); */
+    app.delete("/purches/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await purchesDataCollection.deleteOne(query);
+      console.log(result, "complet");
+      res.send(result);
+    });
   } finally {
     //     // await client.close()
   }
